@@ -5,6 +5,8 @@ class TextResponseExperiment {
         this.currentIndex = 0;
         this.isStarted = false;
         this.userId = null;
+        this.EXPERIMENT_ID = 301;
+        this.COMPLETION_CODE = 'MINT-DEI10-ABC123';
         this.listId = this.getListIdFromUrl();
         
         this.initializeElements();
@@ -219,20 +221,30 @@ class TextResponseExperiment {
     }
 
     completeExperiment() {
-        // Generate a completion code (placeholder implementation)
         const completionCode = this.generateCompletionCode();
         this.completionCode.textContent = completionCode;
+
+        const payload = this.responses.map((r, index) => ({
+            participantId: this.userId,
+            Experiment: this.EXPERIMENT_ID,
+            listId: this.listId,
+            trialIndex: index,
+            textId: r.textId,
+            textIndex: r.textIndex,
+            prompt: this.texts[r.textIndex] ? this.texts[r.textIndex].text : '',
+            response: r.response,
+            responseTimestamp: r.timestamp,
+            completionCode: completionCode,
+            totalTexts: this.texts.length
+        }));
+
+        this.sendDataToServer(payload);
         this.showScreen('completion');
     }
 
     generateCompletionCode() {
-        // Simple completion code generation (placeholder)
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-        for (let i = 0; i < 9; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
+        // Return a fixed, deploy-time configurable completion code
+        return this.COMPLETION_CODE;
     }
 
     downloadResults() {
@@ -254,6 +266,40 @@ class TextResponseExperiment {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    sendDataToServer(jsonData) {
+        const xhr = new XMLHttpRequest();
+        const url = `https://noisy-comp-server-311aa565092d.herokuapp.com/api/submit_experiment/${String(this.EXPERIMENT_ID)}`;
+
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                console.log("Success:", xhr.responseText);
+            } else {
+                console.error("Request failed with status:", xhr.status);
+                console.error("Response:", xhr.responseText);
+                console.error("Request URL:", url);
+                console.error("Request data:", JSON.stringify(jsonData, null, 2));
+            }
+        };
+
+        xhr.onerror = function () {
+            console.error("Network error occurred while sending data");
+        };
+
+        console.log("Sending data to server:", JSON.stringify(jsonData, null, 2));
+        console.log("URL:", url);
+
+        try {
+            const jsonString = JSON.stringify(jsonData);
+            xhr.send(jsonString);
+        } catch (error) {
+            console.error("Error stringifying JSON:", error);
+            console.error("Data that failed to stringify:", jsonData);
+        }
     }
 
     // Public method to load custom CSV data
