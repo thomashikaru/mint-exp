@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Comprehension Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Language Comprehension Game</h1>
+            <p class="instructions">Please read each text carefully and make your best guess about the meaning of the word or sentence.</p>
+        </header>
+
+        <main>
+            <div id="experiment-container">
+                <!-- Welcome Screen -->
+                <div id="welcome-screen" class="screen active">
+                    <h2>Welcome to the Language Comprehension Game</h2>
+                    <p>This game involves reading short texts in another language and trying to decipher them.</p>
+                    <p>You will see <span id="total-texts">0</span> texts in total.</p>
+                    
+                    <div class="user-id-section">
+                        <label for="user-id-input">Please enter your User ID:</label>
+                        <input type="text" id="user-id-input" placeholder="Enter your User ID" required>
+                        <div class="error-message" id="user-id-error"></div>
+                    </div>
+                    
+                    <button id="start-btn" class="btn btn-primary" disabled>Start Game</button>
+                </div>
+
+                <!-- Experiment Screen -->
+                <div id="experiment-screen" class="screen">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <span class="progress-text" id="progress-text">0 / 0</span>
+                    </div>
+
+                    <div class="text-display">
+                        <h3>Text <span id="current-text-number">1</span></h3>
+                        <div class="text-content" id="text-content">
+                            <!-- Text content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="response-section">
+                        <label for="response-textarea">Your Response:</label>
+                        <textarea 
+                            id="response-textarea" 
+                            placeholder="What do you think the text means? Make your best guess!"
+                            rows="6"
+                        ></textarea>
+                        <div class="response-actions">
+                            <button id="next-btn" class="btn btn-primary" disabled>Next</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completion Screen -->
+                <div id="completion-screen" class="screen">
+                    <h2>Thank You!</h2>
+                    <p>You have completed the experiment. Your responses have been recorded.</p>
+                    
+                    <div class="completion-code-section">
+                        <h3>Your Completion Code:</h3>
+                        <div class="completion-code" id="completion-code">ABC123XYZ</div>
+                        <p class="completion-note">Please save this code for your records.</p>
+                    </div>
+                    
+                    <button id="download-btn" class="btn btn-secondary">Download Results</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="experiment.js"></script>
+</body>
+</html>
