@@ -5,9 +5,13 @@ class TextResponseExperiment {
         this.currentIndex = 0;
         this.isStarted = false;
         this.userId = null;
-        this.EXPERIMENT_ID = 301;
+        this.EXPERIMENT_ID = 240;
         this.COMPLETION_CODE = 'MINT-DEI10-ABC123';
+        this.sessionStart = null;
+        this.sessionEnd = null;
         this.listId = this.getListIdFromUrl();
+        this.isTerminated = false;
+        this.experimentCompleted = false;
         
         this.initializeElements();
         this.bindEvents();
@@ -17,11 +21,22 @@ class TextResponseExperiment {
     initializeElements() {
         // Screen elements
         this.welcomeScreen = document.getElementById('welcome-screen');
+        this.consentScreen = document.getElementById('consent-screen');
+        this.aiPolicyScreen = document.getElementById('ai-policy-screen');
         this.experimentScreen = document.getElementById('experiment-screen');
         this.completionScreen = document.getElementById('completion-screen');
+        this.terminatedScreen = document.getElementById('terminated-screen');
         
         // Welcome screen elements
         this.startBtn = document.getElementById('start-btn');
+        
+        // Consent screen elements
+        this.consentCheckbox = document.getElementById('consent-checkbox');
+        this.consentContinueBtn = document.getElementById('consent-continue-btn');
+        
+        // AI Policy screen elements
+        this.aiPolicyCheckbox = document.getElementById('ai-policy-checkbox');
+        this.aiPolicyContinueBtn = document.getElementById('ai-policy-continue-btn');
         this.totalTextsSpan = document.getElementById('total-texts');
         this.userIdInput = document.getElementById('user-id-input');
         this.userIdError = document.getElementById('user-id-error');
@@ -40,11 +55,19 @@ class TextResponseExperiment {
     }
 
     bindEvents() {
-        this.startBtn.addEventListener('click', () => this.startExperiment());
+        this.startBtn.addEventListener('click', () => this.showConsentScreen());
+        this.consentCheckbox.addEventListener('change', () => this.validateConsent());
+        this.consentContinueBtn.addEventListener('click', () => this.showAiPolicyScreen());
+        this.aiPolicyCheckbox.addEventListener('change', () => this.validateAiPolicy());
+        this.aiPolicyContinueBtn.addEventListener('click', () => this.startExperiment());
+        this.textContent.addEventListener('copy', (e) => e.preventDefault());
         this.nextBtn.addEventListener('click', () => this.nextText());
         this.responseTextarea.addEventListener('input', () => this.validateResponse());
+        this.responseTextarea.addEventListener('paste', (e) => e.preventDefault());
         this.downloadBtn.addEventListener('click', () => this.downloadResults());
         this.userIdInput.addEventListener('input', () => this.validateUserId());
+        
+        document.addEventListener('visibilitychange', () => this.onVisibilityChange());
         
         // Allow Enter key to submit (with Ctrl/Cmd modifier to prevent accidental submission)
         this.responseTextarea.addEventListener('keydown', (e) => {
@@ -136,20 +159,48 @@ class TextResponseExperiment {
         }
     }
 
-    startExperiment() {
+    showConsentScreen() {
         if (this.texts.length === 0) {
             alert('No texts available for the experiment.');
             return;
         }
-
         if (!this.validateUserId()) {
             return;
         }
-
         this.userId = this.userIdInput.value.trim();
+        this.consentCheckbox.checked = false;
+        this.consentContinueBtn.disabled = true;
+        this.showScreen('consent');
+    }
+
+    validateConsent() {
+        this.consentContinueBtn.disabled = !this.consentCheckbox.checked;
+    }
+
+    onVisibilityChange() {
+        if (!document.hidden) return;
+        if (!this.isStarted || this.isTerminated || this.experimentCompleted) return;
+        this.isTerminated = true;
+        this.showScreen('terminated');
+    }
+
+    showAiPolicyScreen() {
+        if (!this.consentCheckbox.checked) return;
+        this.aiPolicyCheckbox.checked = false;
+        this.aiPolicyContinueBtn.disabled = true;
+        this.showScreen('aiPolicy');
+    }
+
+    validateAiPolicy() {
+        this.aiPolicyContinueBtn.disabled = !this.aiPolicyCheckbox.checked;
+    }
+
+    startExperiment() {
         this.isStarted = true;
         this.currentIndex = 0;
         this.responses = [];
+        this.sessionStart = new Date().toISOString();
+        this.sessionEnd = null;
         
         this.showScreen('experiment');
         this.displayCurrentText();
@@ -158,19 +209,31 @@ class TextResponseExperiment {
     showScreen(screenName) {
         // Hide all screens
         this.welcomeScreen.classList.remove('active');
+        this.consentScreen.classList.remove('active');
+        this.aiPolicyScreen.classList.remove('active');
         this.experimentScreen.classList.remove('active');
         this.completionScreen.classList.remove('active');
+        this.terminatedScreen.classList.remove('active');
         
         // Show the requested screen
         switch (screenName) {
             case 'welcome':
                 this.welcomeScreen.classList.add('active');
                 break;
+            case 'consent':
+                this.consentScreen.classList.add('active');
+                break;
+            case 'aiPolicy':
+                this.aiPolicyScreen.classList.add('active');
+                break;
             case 'experiment':
                 this.experimentScreen.classList.add('active');
                 break;
             case 'completion':
                 this.completionScreen.classList.add('active');
+                break;
+            case 'terminated':
+                this.terminatedScreen.classList.add('active');
                 break;
         }
     }
@@ -220,11 +283,10 @@ class TextResponseExperiment {
         }
     }
 
-    completeExperiment() {
-        const completionCode = this.generateCompletionCode();
-        this.completionCode.textContent = completionCode;
-
-        const payload = this.responses.map((r, index) => ({
+    buildSubmissionPayload() {
+        const completionCode = this.completionCode ? this.completionCode.textContent : this.generateCompletionCode();
+        const sessionEnd = this.sessionEnd || new Date().toISOString();
+        return this.responses.map((r, index) => ({
             participantId: this.userId,
             Experiment: this.EXPERIMENT_ID,
             listId: this.listId,
@@ -235,9 +297,20 @@ class TextResponseExperiment {
             response: r.response,
             responseTimestamp: r.timestamp,
             completionCode: completionCode,
-            totalTexts: this.texts.length
+            totalTexts: this.texts.length,
+            sessionStart: this.sessionStart,
+            sessionEnd: sessionEnd
         }));
+    }
 
+    completeExperiment() {
+        if (this.isTerminated) return;
+        this.experimentCompleted = true;
+        this.sessionEnd = new Date().toISOString();
+        const completionCode = this.generateCompletionCode();
+        this.completionCode.textContent = completionCode;
+
+        const payload = this.buildSubmissionPayload();
         this.sendDataToServer(payload);
         this.showScreen('completion');
     }
@@ -248,18 +321,10 @@ class TextResponseExperiment {
     }
 
     downloadResults() {
-        const results = {
-            experiment: 'Language Comprehension Game',
-            userId: this.userId,
-            completionCode: this.completionCode.textContent,
-            completedAt: new Date().toISOString(),
-            totalTexts: this.texts.length,
-            responses: this.responses
-        };
-        
-        const dataStr = JSON.stringify(results, null, 2);
+        const payload = this.buildSubmissionPayload();
+        const dataStr = JSON.stringify(payload, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        
+
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
         link.download = `experiment_results_${new Date().toISOString().split('T')[0]}.json`;

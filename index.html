@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <h1>Language Comprehension Game</h1>
-            <p class="instructions">Please read each text carefully and make your best guess about the meaning of the word or sentence.</p>
+            <p class="instructions">Please read each text carefully and make your best guess about what the sentence means. It is from a language that is related to English, so some words may be similar.</p>
         </header>
 
         <main>
@@ -18,7 +18,7 @@
                 <!-- Welcome Screen -->
                 <div id="welcome-screen" class="screen active">
                     <h2>Welcome to the Language Comprehension Game</h2>
-                    <p>This game involves reading short texts in another language and trying to decipher them.</p>
+                    <p>This game involves reading short texts in another language and trying to decipher them. The language is related to English, but it is not English.</p>
                     <p>You will see <span id="total-texts">0</span> texts in total.</p>
                     
                     <div class="user-id-section">
@@ -28,6 +28,39 @@
                     </div>
                     
                     <button id="start-btn" class="btn btn-primary" disabled>Start Game</button>
+                </div>
+
+                <!-- Consent Screen -->
+                <div id="consent-screen" class="screen">
+                    <h2>Informed Consent</h2>
+                    <div class="consent-text">
+                        <p>This study examines how people comprehend written text in an unfamiliar language. Your participation is voluntary. You may withdraw at any time without penalty.</p>
+                        <p>Your responses will be recorded anonymously and used only for research purposes. The data from this study may be presented in academic conferences or published in academic journals. If you have any questions, please contact the researcher at <a href="mailto:thclark@mit.edu">thclark@mit.edu</a>.</p>
+                    </div>
+                    <div class="consent-checkbox-section">
+                        <label class="consent-checkbox-label">
+                            <input type="checkbox" id="consent-checkbox">
+                            <span>I have read the above and agree to participate in this study voluntarily.</span>
+                        </label>
+                    </div>
+                    <button id="consent-continue-btn" class="btn btn-primary" disabled>Continue</button>
+                </div>
+
+                <!-- AI Policy Screen -->
+                <div id="ai-policy-screen" class="screen">
+                    <h2>AI Policy</h2>
+                    <div class="policy-text">
+                        <p><strong>No AI use is allowed during this study.</strong> Do not use ChatGPT, translation tools, or any other AI assistance.</p>
+                        <p>We are interested in <em>your</em> thinking—how you naturally try to understand the texts. The whole experiment takes less than 5 minutes, and there is no advantage to using AI in this context.</p>
+                        <p><strong>Do not switch to another tab or leave this window during the experiment.</strong> Switching tabs will result in the study being automatically ended and your responses will not be recorded.</p>
+                    </div>
+                    <div class="consent-checkbox-section">
+                        <label class="consent-checkbox-label">
+                            <input type="checkbox" id="ai-policy-checkbox">
+                            <span>I agree not to use AI or translation tools during this study.</span>
+                        </label>
+                    </div>
+                    <button id="ai-policy-continue-btn" class="btn btn-primary" disabled>I understand, continue</button>
                 </div>
 
                 <!-- Experiment Screen -->
@@ -49,7 +82,7 @@
                         <textarea 
                             id="response-textarea" 
                             placeholder="What do you think the text means? Make your best guess!"
-                            rows="6"
+                            rows="1"
                         ></textarea>
                         <div class="response-actions">
                             <button id="next-btn" class="btn btn-primary" disabled>Next</button>
@@ -69,6 +102,12 @@
                     </div>
                     
                     <button id="download-btn" class="btn btn-secondary">Download Results</button>
+                </div>
+
+                <!-- Terminated Screen (tab switch during experiment) -->
+                <div id="terminated-screen" class="screen">
+                    <h2>Experiment Terminated</h2>
+                    <p>You switched to another tab during the experiment. As explained in the instructions, this results in termination of the study. Your responses have not been recorded. Please return the study on Prolific.</p>
                 </div>
             </div>
         </main>
