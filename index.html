@@ -22,8 +22,8 @@
                     <p>You will see <span id="total-texts">0</span> texts in total.</p>
                     
                     <div class="user-id-section">
-                        <label for="user-id-input">Please enter your User ID:</label>
-                        <input type="text" id="user-id-input" placeholder="Enter your User ID" required>
+                        <label for="user-id-input">Please enter your Prolific ID:</label>
+                        <input type="text" id="user-id-input" placeholder="Enter your Prolific ID" required>
                         <div class="error-message" id="user-id-error"></div>
                     </div>
                     
@@ -81,9 +81,10 @@
                         <label for="response-textarea">Your Response:</label>
                         <textarea 
                             id="response-textarea" 
-                            placeholder="What do you think the text means? Make your best guess!"
-                            rows="1"
+                            placeholder="What do you think the text means? Make your best guess! Capitalization doesn't matter."
+                            rows="2"
                         ></textarea>
+                        <div class="error-message" id="response-length-error"></div>
                         <div class="response-actions">
                             <button id="next-btn" class="btn btn-primary" disabled>Next</button>
                         </div>

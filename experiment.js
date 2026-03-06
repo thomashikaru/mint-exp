@@ -6,7 +6,7 @@ class TextResponseExperiment {
         this.isStarted = false;
         this.userId = null;
         this.EXPERIMENT_ID = 240;
-        this.COMPLETION_CODE = 'MINT-DEI10-ABC123';
+        this.COMPLETION_CODE = 'C8444JFR';
         this.sessionStart = null;
         this.sessionEnd = null;
         this.listId = this.getListIdFromUrl();
@@ -47,6 +47,7 @@ class TextResponseExperiment {
         this.currentTextNumber = document.getElementById('current-text-number');
         this.textContent = document.getElementById('text-content');
         this.responseTextarea = document.getElementById('response-textarea');
+        this.responseLengthError = document.getElementById('response-length-error');
         this.nextBtn = document.getElementById('next-btn');
         
         // Completion screen elements
@@ -145,11 +146,11 @@ class TextResponseExperiment {
         const errorElement = this.userIdError;
         
         if (userId.length === 0) {
-            errorElement.textContent = 'Please enter your User ID';
+            errorElement.textContent = 'Please enter your Prolific ID';
             this.startBtn.disabled = true;
             return false;
         } else if (userId.length < 3) {
-            errorElement.textContent = 'User ID must be at least 3 characters long';
+            errorElement.textContent = 'ID must be at least 3 characters long';
             this.startBtn.disabled = true;
             return false;
         } else {
@@ -250,22 +251,35 @@ class TextResponseExperiment {
         this.currentTextNumber.textContent = this.currentIndex + 1;
         this.textContent.textContent = currentText.text;
         
-        // Clear response and reset button
+        // Clear response, reset button, and any length error
         this.responseTextarea.value = '';
         this.nextBtn.disabled = true;
+        this.responseLengthError.textContent = '';
         this.responseTextarea.focus();
+    }
+
+    getResponseWordCount(text) {
+        return text.trim().split(/\s+/).filter(Boolean).length;
     }
 
     validateResponse() {
         const response = this.responseTextarea.value.trim();
+        const wordCount = this.getResponseWordCount(response);
         this.nextBtn.disabled = response.length === 0;
+        if (wordCount > 2) {
+            this.responseLengthError.textContent = '';
+        }
     }
 
     nextText() {
-        if (this.nextBtn.disabled) return;
+        const response = this.responseTextarea.value.trim();
+        if (this.getResponseWordCount(response) <= 2) {
+            this.responseLengthError.textContent = 'Response is too short. Please try again.';
+            return;
+        }
+        this.responseLengthError.textContent = '';
         
         // Save current response
-        const response = this.responseTextarea.value.trim();
         this.responses.push({
             textId: this.texts[this.currentIndex].id,
             textIndex: this.currentIndex,

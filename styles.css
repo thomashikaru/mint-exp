@@ -223,6 +223,11 @@ main {
     min-height: 20px;
 }
 
+#response-length-error {
+    min-height: 1.5em;
+    margin-bottom: 4px;
+}
+
 /* Progress bar */
 .progress-bar {
     background-color: #e9ecef;
