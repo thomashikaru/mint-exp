@@ -94,12 +94,18 @@
                 <!-- Completion Screen -->
                 <div id="completion-screen" class="screen">
                     <h2>Thank You!</h2>
-                    <p>You have completed the experiment. Your responses have been recorded.</p>
+                    <p>You have completed the experiment. Your responses have been recorded, and you may now close this window.</p>
                     
                     <div class="completion-code-section">
                         <h3>Your Completion Code:</h3>
                         <div class="completion-code" id="completion-code">ABC123XYZ</div>
-                        <p class="completion-note">Please save this code for your records.</p>
+                    </div>
+                    
+                    <div class="completion-feedback-section">
+                        <label for="feedback-textarea">Please feel free to leave any comments or feedback here.</label>
+                        <textarea id="feedback-textarea" rows="3" placeholder="Optional comments or feedback..."></textarea>
+                        <button id="feedback-submit-btn" class="btn btn-secondary">Submit feedback</button>
+                        <span class="feedback-sent-msg" id="feedback-sent-msg"></span>
                     </div>
                     
                     <button id="download-btn" class="btn btn-secondary">Download Results</button>

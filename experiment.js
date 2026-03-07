@@ -53,6 +53,9 @@ class TextResponseExperiment {
         // Completion screen elements
         this.downloadBtn = document.getElementById('download-btn');
         this.completionCode = document.getElementById('completion-code');
+        this.feedbackTextarea = document.getElementById('feedback-textarea');
+        this.feedbackSubmitBtn = document.getElementById('feedback-submit-btn');
+        this.feedbackSentMsg = document.getElementById('feedback-sent-msg');
     }
 
     bindEvents() {
@@ -66,6 +69,7 @@ class TextResponseExperiment {
         this.responseTextarea.addEventListener('input', () => this.validateResponse());
         this.responseTextarea.addEventListener('paste', (e) => e.preventDefault());
         this.downloadBtn.addEventListener('click', () => this.downloadResults());
+        this.feedbackSubmitBtn.addEventListener('click', () => this.submitFeedback());
         this.userIdInput.addEventListener('input', () => this.validateUserId());
         
         document.addEventListener('visibilitychange', () => this.onVisibilityChange());
@@ -182,7 +186,27 @@ class TextResponseExperiment {
         if (!document.hidden) return;
         if (!this.isStarted || this.isTerminated || this.experimentCompleted) return;
         this.isTerminated = true;
+        const payload = this.buildTerminatedPayload();
+        this.sendDataToServer(payload);
         this.showScreen('terminated');
+    }
+
+    buildTerminatedPayload() {
+        return [{
+            participantId: this.userId,
+            Experiment: this.EXPERIMENT_ID,
+            listId: this.listId,
+            trialIndex: null,
+            textId: null,
+            textIndex: null,
+            prompt: null,
+            response: 'Experiment terminated: participant switched to another tab during the study.',
+            responseTimestamp: new Date().toISOString(),
+            completionCode: null,
+            totalTexts: this.texts.length,
+            sessionStart: this.sessionStart,
+            sessionEnd: new Date().toISOString()
+        }];
     }
 
     showAiPolicyScreen() {
@@ -327,11 +351,41 @@ class TextResponseExperiment {
         const payload = this.buildSubmissionPayload();
         this.sendDataToServer(payload);
         this.showScreen('completion');
+        this.downloadBtn.disabled = this.userId !== 'test';
     }
 
     generateCompletionCode() {
         // Return a fixed, deploy-time configurable completion code
         return this.COMPLETION_CODE;
+    }
+
+    buildFeedbackPayload(feedbackText) {
+        const completionCode = this.completionCode ? this.completionCode.textContent : this.generateCompletionCode();
+        const sessionEnd = this.sessionEnd || new Date().toISOString();
+        return [{
+            participantId: this.userId,
+            Experiment: this.EXPERIMENT_ID,
+            listId: this.listId,
+            trialIndex: null,
+            textId: null,
+            textIndex: null,
+            prompt: null,
+            response: feedbackText,
+            responseTimestamp: new Date().toISOString(),
+            completionCode: completionCode,
+            totalTexts: this.texts.length,
+            sessionStart: this.sessionStart,
+            sessionEnd: sessionEnd
+        }];
+    }
+
+    submitFeedback() {
+        const feedbackText = this.feedbackTextarea.value.trim();
+        const payload = this.buildFeedbackPayload(feedbackText);
+        this.sendDataToServer(payload);
+        this.feedbackSubmitBtn.disabled = true;
+        this.feedbackTextarea.disabled = true;
+        this.feedbackSentMsg.textContent = 'Thank you!';
     }
 
     downloadResults() {

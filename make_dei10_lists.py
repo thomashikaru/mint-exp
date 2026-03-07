@@ -5,11 +5,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEI10_CSV = ROOT / "out" / "dei10" / "dei10_item_filtered.csv"
-EXP_DIR = ROOT / "exp"
+EXP_DIR = ROOT / "mint-exp"
 
 
 def load_items():
-    ids_to_drop = {"80685", "7480", "51266", "3841"}
+    ids_to_drop = {"80685", "51266", "3841", "29718"}
     items = []
     with DEI10_CSV.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -44,7 +44,9 @@ def main():
     n_lists = 20
     items_per_list = 5
     total_needed = n_lists * items_per_list
-    assert total_needed == len(items), "Number of items must equal n_lists * items_per_list"
+    assert total_needed == len(
+        items
+    ), "Number of items must equal n_lists * items_per_list"
 
     for i in range(n_lists):
         start = i * items_per_list
@@ -55,4 +57,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
