@@ -351,7 +351,9 @@ class TextResponseExperiment {
         const payload = this.buildSubmissionPayload();
         this.sendDataToServer(payload);
         this.showScreen('completion');
-        this.downloadBtn.disabled = this.userId !== 'test';
+        const showDownload = this.userId === 'test';
+        this.downloadBtn.disabled = !showDownload;
+        this.downloadBtn.style.display = showDownload ? '' : 'none';
     }
 
     generateCompletionCode() {
